@@ -1,0 +1,1 @@
+# plugins-deposits-partial-payments-for-woocommerce
