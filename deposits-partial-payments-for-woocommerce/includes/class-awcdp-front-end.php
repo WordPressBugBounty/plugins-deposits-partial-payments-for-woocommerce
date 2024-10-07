@@ -195,6 +195,7 @@ class AWCDP_Front_End
 
     public function frontend_enqueue_scripts() {
 
+        // wp_register_script($this->_token . '-frontend', esc_url($this->assets_url) . 'js/frontend.js', array('jquery'), $this->_version, true);
         wp_register_script($this->_token . '-frontend', esc_url($this->assets_url) . 'js/frontend-min.js', array('jquery'), $this->_version, true);
 
         wp_enqueue_script($this->_token . '-frontend');
