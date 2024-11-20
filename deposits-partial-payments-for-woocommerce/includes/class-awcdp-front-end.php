@@ -150,7 +150,7 @@ class AWCDP_Front_End
             add_filter( 'wt_stripe_cart_total_before_payment', array($this, 'awcdp_update_WebToffee_stripe_cart_total') );
             
             add_filter( 'learndash_woocommerce_auto_complete_order', function( $auto_complete, $order_id ) { return false; }, 10, 2 );
-			add_filter( 'wc_stripe_output_display_items', array($this, 'awcdp_update_wc_stripe_output_display_items'), 10, 3 );
+			      add_filter( 'wc_stripe_output_display_items', array($this, 'awcdp_update_wc_stripe_output_display_items'), 10, 3 );
         
 
         }

@@ -1,20 +1,20 @@
 <?php
 /*
  * Plugin Name: Deposits & Partial Payments for WooCommerce
- * Version: 1.1.24
+ * Version: 1.1.25
  * Description: WooCommerce deposits allows customers to pay for products using a fixed or percentage amount in WooCommerce store
  * Author: Acowebs
  * Author URI: http://acowebs.com
  * Requires at least: 4.0
- * Tested up to: 6.6
+ * Tested up to: 6.7
  * Text Domain: deposits-partial-payments-for-woocommerce
  * WC requires at least: 4.0.0
- * WC tested up to: 9.3
+ * WC tested up to: 9.4
  * Requires Plugins: woocommerce
  */
 
 define('AWCDP_TOKEN', 'awcdp');
-define('AWCDP_VERSION', '1.1.24');
+define('AWCDP_VERSION', '1.1.25');
 define('AWCDP_FILE', __FILE__);
 define('AWCDP_PLUGIN_NAME', 'Deposits & Partial Payments for WooCommerce');
 define('AWCDP_TEXT_DOMAIN', 'deposits-partial-payments-for-woocommerce');
