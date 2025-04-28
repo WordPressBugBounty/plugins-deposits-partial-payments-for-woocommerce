@@ -460,8 +460,39 @@ class AWCDP_Front_End
     return apply_filters('awcdp_product_deposit_amount', $amount, $product_id);
   }
 
+
+  
+  function user_restriction(){
+
+    $awcdp_gs = get_option('awcdp_general_settings');
+    $require_login = (isset($awcdp_gs['require_login']) && $awcdp_gs['require_login'] == 1) ? 1 : 0;
+
+    if( !is_user_logged_in() && $require_login == 1 ){
+      return 0;
+    }
+
+    $disallowed_roles = ( isset($awcdp_gs['disable_roles']) ) ? $awcdp_gs['disable_roles'] : '';
+    $current_user = wp_get_current_user()->roles;
+
+    if( is_array($disallowed_roles) && !empty($disallowed_roles) ){
+      if( is_array($current_user) && !empty($current_user) ){
+        foreach($current_user as $rol ){
+          if( in_array($rol, $disallowed_roles) ){
+            return 0;
+          }
+        }
+      }
+    }
+    return 1;
+  }
+
+
     function awcdp_add_cart_item_data($cart_item_meta, $product_id, $variation_id){
 
+      if( $this->user_restriction() == 0 ){
+        return $cart_item_meta;
+      }
+      
       $dp_enabled = $this->awcdp_deposits_enabled( $product_id );
       if ( !$dp_enabled ) {
         return $cart_item_meta;
