@@ -599,6 +599,7 @@ class AWCDP_Backend
       if ($deposit_enabled) {
 
         $deposit = $wfontend->awcdp_get_deposit_amount($product->get_id());
+        $deposit = floatval($deposit);
         $type = $wfontend->awcdp_get_deposit_type($product->get_id());
 
         $price_include_tax = get_option('woocommerce_prices_include_tax');
