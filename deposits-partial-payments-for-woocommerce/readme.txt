@@ -6,7 +6,7 @@ Donate link:
 Tags: WooCommerce, Deposit, Woocommerce deposits, Payment, installments
 Requires at least: 4.0
 Tested up to: 6.8
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,24 +15,24 @@ WooCommerce Deposits and Partial Payments Plugin helps customers to make payment
 == Description ==
 WooCommerce Deposits and Partial Payments Plugin helps customers to make payments for the products they buy using a partial payment or a deposit. With the partial payment WooCommerce extension, you can handle the partial payments, force a deposit or let customers pay a percentage or a fixed price upfront.
 
-When having an option to purchase by making partial payments for their favorite products, the customers develop a unique interest in your products. It is more likely that customers return to your store and find WooCommerce partial payments plans helpful for them to purchase products that they wouldn't go for in the absence of the option.
+When having an option to purchase by making partial payments for their favorite products, the customers develop a unique interest in your products. It is more likely that customers return to your store and find WooCommerce partial payments plans helpful for them to purchase products that they wouldn’t go for in the absence of the option.
 
-Enhance customer loyalty with Woocommerce deposits and part payments plugin and let your customers split the payment for their order, pay a deposit and pay the remaining later.
+Enhance customer loyalty with Woocommerce deposits and part payments plugin, and woo commerce payment plans to let your customers split the payment for their order, pay a deposit and pay the remaining later.
 
 [Try the Demo](https://woo-deposits-free-demo.acowebs.com/) | [Documents](https://acowebs.com/support/) | [Pro Version](https://woo-deposits-demo.acowebs.com/)
 
 == How to Manage WooCommerce Deposits Settings? ==
 Once you activate the Woocommerce Partial Payments plugin, choose the Deposits menu in the left menu bar of WordPress. You can use the option to manage the Deposits settings using the available choices provided.
 
-With the WooCommerce payment plan plugin, you can sell the products and services where it is ideal to request partial payments like custom-made products, event space rental, etc.
+With the WooCommerce payment plan plugin, you can sell the products and services where it is ideal to request partial payments, like custom-made products, event space rental, all made easier by deposit payment woocommerce.
 
-You can win the customers' trust by allowing them to make part payments for the product beforehand by improving the reliability. You can also offer a favorable service to the users to retain your orders with the WooCommerce partial payment plugin.
+You can win the customers’ trust by allowing them to make part payments for the product beforehand by improving the reliability via woocommerce partial payment plugin free. You can also offer a favorable service to the users to retain your orders with the WooCommerce partial payment plugin.
 
-= Check out our video demo on how this works: =
+= Check out our video demo on how Deposits & Partial Payments Plugin works: =
  [youtube https://www.youtube.com/watch?v=f6mIEzFMn7Y&rel=0]
 
-== BASIC FEATURES ==
-Acowebs WooCommerce partial payments plugin can let you enhance your credibility, especially when you focus on selling high-cost products. High-end price products can lose customers on a large scale since they can't afford to pay the whole amount in one go.
+== BASIC FEATURES OF Deposits & Partial Payments Plugin ==
+Acowebs WooCommerce partial payments plugin can let you enhance your credibility, especially when you focus on selling high-cost products. High-end price products can lose customers on a large scale since they can’t afford to pay the whole amount in one go. The convenience offered by woocommerce payment plans makes it a must-have tool for your woocommerce website.
 
 Rather than being a reliable plugin, the Woocommerce deposit plugin lets your customers shop with ease and enjoy the benefits of paying in installments.
 
@@ -45,22 +45,22 @@ Here are the features of the Woocommerce partial payment plugin-free version:
 🔹 Product level custom WooCommerce deposits settings and global level settings
 🔹 Enable and disable deposits for particular products
 🔹 Customers can make the balance amount payable through the account login
-🔹 Option to disable specific payment gateways while making checkout for the product orders
+🔹 Option to disable specific payment gateways while making checkout for the product deposits orders
 🔹 Can customize the plugin texts and labels
-🔹 Translation support
+🔹 Translation support is also available with the woocommerce payment plan plugin
 
-== DEMO - CHECK THIS OUT IN REAL ==
+== DEMO – CHECK OUT Deposits & Partial Payments plugin IN REAL ==
 
 🔗 [Front end Demo](https://woo-deposits-free-demo.acowebs.com/)
 🔗 [Backend Demo](https://woo-deposits-free-demo.acowebs.com/wp-admin/admin.php?page=awcdp_admin_ui#/)
 
-== PREMIUM FEATURES ==
-We all have made the deposits to buy an amazing product in the favorites and opted to pay the balance later while taking your time. This, when coming to the online payments and e-commerce stores, customers opt to purchase your products at the very moment because the Woocommerce part payments plugin has allowed paying to make deposits. The deposits for the WooCommerce plugin can let your customers benefit from the down payment, which lets them grab the wished product without bearing the burden of making the entire payment in one go.
+== PREMIUM FEATURES of Deposits & Partial Payments Plugin ==
+We all have made the deposits to buy an amazing product in the favorites and opted to pay the balance later while taking your time. This, when coming to the online payments and e-commerce stores, customers opt to purchase your products at the very moment because the Woocommerce part payments plugin or partial payment woocommerce has allowed paying to make deposits. The deposits for WooCommerce plugin can let your customers benefit from the down payment, which lets them grab the wished product without bearing the burden of making the entire payment in one go.
 
 Here are the features of the Woocommerce partial payment plugin-premium version:
 
 👉 All features on Woocommerce Partial payments free version
-👉 Flexible Payment plans
+👉 Flexible  woocommerce Payment plans
 👉 Implement deposits on checkout
 👉 Send email reminders notification for balance payment
 👉 Send email notifications to client & admin based on the deposit creation/payments
@@ -72,6 +72,7 @@ Here are the features of the Woocommerce partial payment plugin-premium version:
 👉 Stock management based on deposit.
 👉 Assign multiple payment plans for a single product
 👉 Payment schedules as per days, weeks, months, or year
+And many more features in Deposits & Partial Payments for WooCommerce Plugin.
 
 ➡ <strong>[GET PREMIUM VERSION NOW!](https://acowebs.com/woocommerce-deposits-partial-payments/) </strong>
 
@@ -125,6 +126,8 @@ With the partial payment WooCommerce plugin free version, you can gather the dep
 Yes, with the Woocommerce Deposits & Partial Payments plugin, the deposits are refundable but it needs to be refunded manually from the order placed.
 
 == Changelog ==
+= 1.2.2 =
+* Support for WooCommerce 10
 = 1.2.1 =
 * Bug fix
 = 1.2.0 =
