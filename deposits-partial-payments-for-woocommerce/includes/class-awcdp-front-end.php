@@ -151,6 +151,9 @@ class AWCDP_Front_End
             
             add_filter( 'learndash_woocommerce_auto_complete_order', function( $auto_complete, $order_id ) { return false; }, 10, 2 );
 			      add_filter( 'wc_stripe_output_display_items', array($this, 'awcdp_update_wc_stripe_output_display_items'), 10, 3 );
+
+
+            add_action('woocommerce_store_api_checkout_order_processed', array($this, 'awcdp_block_checkout_create_order'), 10, 1);
         
 
         }
@@ -224,7 +227,17 @@ class AWCDP_Front_End
 
     function awcdp_get_deposit_container($product_id){
 
-      if (!apply_filters('awcdp_disable_deposit_condition', true)) { return; }
+      if( $product_id != ''){
+        $product_id = $product_id;
+        $product = wc_get_product($product_id);
+      } else {
+        global $product;
+        if($product){
+          $product_id = $product->get_id() ;
+        }
+      }
+
+      if (!apply_filters('awcdp_disable_deposit_condition', $product, true)) { return; }
 
       $awcdp_gs = get_option('awcdp_general_settings');
       $require_login = (isset($awcdp_gs['require_login']) && $awcdp_gs['require_login'] == 1) ? 1 : 0;
@@ -232,19 +245,8 @@ class AWCDP_Front_End
       if( !is_user_logged_in() && $require_login == 1 ){
         return;
       }
-
-        //global $product;
-        //echo $this->awcdp_deposits_form( $product->get_id() );
-		       
-      if( $product_id != ''){
-        $product_id = $product_id;
-      } else {
-        global $product;
-        if($product){
-			$product_id = $product->get_id() ;
-		}
-      }
-	  echo $this->awcdp_deposits_form( $product_id );
+     
+	    echo $this->awcdp_deposits_form( $product_id );
 
     }
 
@@ -390,6 +392,8 @@ class AWCDP_Front_End
   function awcdp_deposits_enabled( $product_id ){
 
     $product = wc_get_product( $product_id );
+
+    if (!apply_filters('awcdp_disable_deposit_condition', $product, true)) { return; }
 
     //if ( ! $product || $product->is_type( array( 'grouped', 'external', 'bundle', 'composite', 'easy_product_bundle' ) ) ) {
     if ( ! $product || $product->is_type( array( 'grouped', 'external', 'bundle', 'composite' ) ) ) {
@@ -1810,7 +1814,7 @@ class AWCDP_Front_End
                 $item->set_name($partial_payment_name);
                 $partial_payment->add_item($item);
 
-				do_action('awcdp_deposits_do_partial_payment_meta', $partial_payment );
+				        do_action('awcdp_deposits_do_partial_payment_meta', $partial_payment );
 
                 $partial_payment->set_parent_id($order->get_id());
                 $partial_payment->add_meta_data('is_vat_exempt', $order_vat_exempt);
@@ -1867,6 +1871,127 @@ class AWCDP_Front_End
 
         } catch (Exception $e) {
             return new WP_Error('checkout-error', $e->getMessage());
+        }
+
+    }
+
+
+    
+    function awcdp_block_checkout_create_order($order) {
+
+        if (!isset(WC()->cart->deposit_info['deposit_enabled']) || WC()->cart->deposit_info['deposit_enabled'] !== true) {
+            return;
+        }
+
+        // Reuse much of the logic from awcdp_create_order, adapted for block checkout
+        try {
+            $order->read_meta_data();
+            $payment_schedule = WC()->cart->deposit_info['payment_schedule'];
+            $deposit_amount = WC()->cart->deposit_info['deposit_amount'];
+            $deposit_breakdown = WC()->cart->deposit_info['deposit_breakdown'];
+            $second_payment = WC()->cart->get_total('edit') - $deposit_amount;
+
+            // Save deposit-related meta data to the order
+            $deposit_data = array(
+                'id' => '',
+                'title' => esc_html__('Deposit', 'deposits-partial-payments-for-woocommerce'),
+                'type' => 'deposit',
+                'total' => $deposit_amount,
+            );
+            $sorted_schedule = array('deposit' => $deposit_data) + $payment_schedule;
+            $payment_schedule = $sorted_schedule;
+
+            $order->add_meta_data('_awcdp_deposits_payment_schedule', $sorted_schedule, true);
+            $order->add_meta_data('_awcdp_deposits_order_has_deposit', 'yes', true);
+            $order->add_meta_data('_awcdp_deposits_deposit_paid', 'no', true);
+            $order->add_meta_data('_awcdp_deposits_second_payment_paid', 'no', true);
+            $order->add_meta_data('_awcdp_deposits_deposit_amount', $deposit_amount, true);
+            $order->add_meta_data('_awcdp_deposits_second_payment', $second_payment, true);
+            $order->add_meta_data('_awcdp_deposits_deposit_breakdown', $deposit_breakdown, true);
+            $order->add_meta_data('_awcdp_deposits_deposit_payment_time', ' ', true);
+            $order->add_meta_data('_awcdp_deposits_second_payment_reminder_email_sent', 'no', true);
+
+            // Create partial payment orders
+            $deposit_id = null;
+            foreach ($payment_schedule as $partial_key => $payment) {
+                $partial_payment = new AWCDP_Order();
+                $partial_payment->set_customer_id($order->get_customer_id());
+                $amount = $payment['total'];
+                $name = esc_html__('Partial Payment for order %s', 'deposits-partial-payments-for-woocommerce');
+                $partial_payment_name = apply_filters('awcdp_deposits_partial_payment_name', sprintf($name, $order->get_order_number()), $payment, $order->get_id());
+
+                $item = new WC_Order_Item_Fee();
+                $item->set_props(array('total' => $amount));
+                $item->set_name($partial_payment_name);
+                $partial_payment->add_item($item);
+
+                do_action('awcdp_deposits_do_partial_payment_meta', $partial_payment);
+
+                $partial_payment->set_parent_id($order->get_id());
+                $partial_payment->add_meta_data('is_vat_exempt', $order->get_meta('is_vat_exempt'));
+                $partial_payment->add_meta_data('_awcdp_deposits_payment_type', $payment['type']);
+                if (is_numeric($partial_key)) {
+                    $partial_payment->add_meta_data('_awcdp_deposits_partial_payment_date', $partial_key);
+                }
+                $partial_payment->set_currency($order->get_currency());
+                $partial_payment->set_prices_include_tax('yes' === get_option('woocommerce_prices_include_tax'));
+                $partial_payment->set_customer_ip_address($order->get_customer_ip_address());
+                $partial_payment->set_customer_user_agent($order->get_customer_user_agent());
+                $partial_payment->set_total($amount);
+                $partial_payment->save();
+
+                $this->add_apifw_invoice_meta($partial_payment, $amount, $partial_payment_name);
+
+                // Handle custom order number meta
+                $order_number_meta = $order->get_meta('_alg_wc_full_custom_order_number', true);
+                if ($order_number_meta) {
+                    $partial_payment->add_meta_data('_alg_wc_full_custom_order_number', $order_number_meta);
+                }
+
+                // Copy billing and shipping fields
+                foreach (['billing', 'shipping'] as $type) {
+                    foreach ($order->get_address($type) as $key => $value) {
+
+                    if (is_callable(array($order, "set_{$key}"))) {
+                      //   $partial_payment->{"set_{$key}"}($value);
+                    } elseif (isset($fields_prefix[current(explode('_', $key))])) {
+                        if (!isset($shipping_fields[$key])) {
+                        //   $partial_payment->update_meta_data('_' . $key, $value);
+
+                          $partial_payment->update_meta_data("_{$type}_{$key}", $value);
+                        }
+                    }
+
+
+                        // $partial_payment->update_meta_data("_{$type}_{$key}", $value);
+                    }
+                }
+
+                // Handle WPML language
+                $wpml_lang = $order->get_meta('wpml_language', true);
+                if ($payment['type'] === 'deposit') {
+                    $partial_payment->save();
+                    $deposit_id = $partial_payment->get_id();
+                    $partial_payment->set_payment_method($order->get_payment_method());
+                    if (!empty($wpml_lang)) {
+                        $partial_payment->update_meta_data('wpml_language', $wpml_lang);
+                    }
+                    $partial_payment->save();
+                }
+
+                $payment_schedule[$partial_key]['id'] = $partial_payment->get_id();
+            }
+
+            $order->update_meta_data('_awcdp_deposits_payment_schedule', $payment_schedule);
+            $order->save();
+
+            // Set the order ID for the deposit payment if needed
+            if ($deposit_id) {
+                WC()->session->set('order_awaiting_payment', $deposit_id);
+            }
+
+        } catch (Exception $e) {
+            wc_add_notice($e->getMessage(), 'error');
         }
 
     }
