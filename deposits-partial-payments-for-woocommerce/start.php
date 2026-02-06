@@ -1,20 +1,20 @@
 <?php
 /*
  * Plugin Name: Deposits & Partial Payments for WooCommerce
- * Version: 1.2.3
+ * Version: 1.2.7
  * Description: WooCommerce deposits allows customers to pay for products using a fixed or percentage amount in WooCommerce store
  * Author: Acowebs
  * Author URI: http://acowebs.com
  * Requires at least: 4.0
- * Tested up to: 6.8
+ * Tested up to: 6.9
  * Text Domain: deposits-partial-payments-for-woocommerce
  * WC requires at least: 4.0.0
- * WC tested up to: 10.1
+ * WC tested up to: 10.4
  * Requires Plugins: woocommerce
  */
 
 define('AWCDP_TOKEN', 'awcdp');
-define('AWCDP_VERSION', '1.2.3');
+define('AWCDP_VERSION', '1.2.7');
 define('AWCDP_FILE', __FILE__);
 define('AWCDP_PLUGIN_NAME', 'Deposits & Partial Payments for WooCommerce');
 define('AWCDP_TEXT_DOMAIN', 'deposits-partial-payments-for-woocommerce');
@@ -75,6 +75,11 @@ new AWCDP_Front_End(__FILE__, AWCDP_VERSION);
 
 new AWCDP_Compatibility(__FILE__, AWCDP_VERSION);
 
+// Load WooCommerce Blocks integration
+if (file_exists(AWCDP_PLUGIN_PATH . 'includes/blocks/main.php')) {
+    require_once AWCDP_PLUGIN_PATH . 'includes/blocks/main.php';
+}
+
 add_action('current_screen', 'awcpd_setup_screen');
 
 if (!function_exists('awcpd_setup_screen')) {
@@ -105,6 +110,6 @@ add_action( 'before_woocommerce_init', function() {
 
 add_action( 'before_woocommerce_init', function() {
     if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
-        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, false );
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
     }
 } );

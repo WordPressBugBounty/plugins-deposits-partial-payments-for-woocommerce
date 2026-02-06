@@ -1,0 +1,36 @@
+.wc-block-awcdp-totals {
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+}
+
+.wc-block-awcdp-totals .wc-block-components-totals-item,
+.awcdp-partial-payments-details,
+.awcdp-partial-payments-details.wc-block-components-totals-item,
+.awcdp-deposit-amount,
+.awcdp-future-amount,
+.awcdp-deposit-amount.wc-block-components-totals-item,
+.awcdp-future-amount.wc-block-components-totals-item {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    padding: 12px 0 !important;
+    margin: 0 !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.wc-block-awcdp-totals .wc-block-components-totals-item:last-child,
+.awcdp-partial-payments-details:last-child {
+    border-bottom: none !important;
+}
+
+.wc-block-awcdp-totals .wc-block-components-totals-item__label,
+.wc-block-awcdp-totals .wc-block-components-totals-item__value,
+.awcdp-partial-payments-details .wc-block-components-totals-item__label,
+.awcdp-partial-payments-details .wc-block-components-totals-item__value {
+    font-weight: 400 !important;
+    color: #1e1e1e !important;
+    font-size: 14px !important;
+}

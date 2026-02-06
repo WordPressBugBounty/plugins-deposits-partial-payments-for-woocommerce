@@ -155,6 +155,7 @@ class AWCDP_Front_End
 
             add_action('woocommerce_store_api_checkout_order_processed', array($this, 'awcdp_block_checkout_create_order'), 10, 1);
         
+            add_filter( 'woocommerce_gzd_instant_order_confirmation', '__return_false' );
 
         }
 
@@ -608,7 +609,8 @@ class AWCDP_Front_End
                       } else {
                         // my-edit 04-12-21
                         if (wc_prices_include_tax() && isset($cart_item_data['awcdp_deposit']['original_price']) ) {
-                        //  $amount = $cart_item_data['awcdp_deposit']['original_price'];
+                          // uncommented this to fix deposit calculation when prices include tax - 03-02-2026
+                         $amount = $cart_item_data['awcdp_deposit']['original_price'];
                         }
                         // my-edit 04-12-21
                           $deposit = $amount * (floatval($deposit_amount_meta) / 100.0);

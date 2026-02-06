@@ -5,8 +5,8 @@ Contributors: acowebs, saneshacodez
 Donate link:
 Tags: WooCommerce, Deposit, Woocommerce deposits, Payment, installments
 Requires at least: 4.0
-Tested up to: 6.8
-Stable tag: 1.2.3
+Tested up to: 6.9
+Stable tag: 1.2.7
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -72,6 +72,7 @@ Here are the features of the Woocommerce partial payment plugin-premium version:
 👉 Stock management based on deposit.
 👉 Assign multiple payment plans for a single product
 👉 Payment schedules as per days, weeks, months, or year
+👉 Automatic future installment payment processing with popular payment gateway **Stripe**.
 And many more features in Deposits & Partial Payments for WooCommerce Plugin.
 
 ➡ <strong>[GET PREMIUM VERSION NOW!](https://acowebs.com/woocommerce-deposits-partial-payments/) </strong>
@@ -126,6 +127,16 @@ With the partial payment WooCommerce plugin free version, you can gather the dep
 Yes, with the Woocommerce Deposits & Partial Payments plugin, the deposits are refundable but it needs to be refunded manually from the order placed.
 
 == Changelog ==
+= 1.2.7 =
+* Bug fix
+= 1.2.6 =
+* Bug fix
+= 1.2.5 =
+* Support for WordPress 6.9
+* Support for WooCommerce 10.4
+= 1.2.4 =
+* Support for WooCommerce 10.3
+* Bug fix
 = 1.2.3 =
 * Support for WooCommerce 10.1
 * Bug fix

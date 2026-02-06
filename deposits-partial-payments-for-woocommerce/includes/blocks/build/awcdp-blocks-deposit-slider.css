@@ -1,0 +1,350 @@
+.wc-block-awcdp-totals,
+.wc-block-awcdp-totals .wc-block-components-totals-wrapper,
+.wc-block-awcdp-totals .wc-block-components-totals-item,
+.awcdp-partial-payments-details,
+.awcdp-partial-payments-details.wc-block-components-totals-item {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+#awcdp-blocks-container {
+    margin-bottom: 0;
+}
+
+.awcdp-blocks-deposit-slider {
+    position: relative;
+    padding: 16px;
+    margin: 0 0 16px 0;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    /* border-radius: 8px; */
+}
+
+.awcdp-blocks-deposit-slider.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.awcdp-option {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    padding: 12px 0;
+    cursor: pointer;
+    border-top: 1px solid #e0e0e0;
+}
+
+.awcdp-option:first-child {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.awcdp-option:last-child {
+    padding-bottom: 0;
+}
+
+.awcdp-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.awcdp-option .radio-circle {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    margin-right: 12px;
+    margin-top: 2px;
+    transition: border-color 0.2s ease;
+    cursor: pointer;
+    margin-left: 12px;
+}
+
+.awcdp-option:hover .radio-circle {
+    border-color: #999;
+}
+
+.awcdp-option.selected .radio-circle {
+    border-color: #2271b1;
+}
+
+.awcdp-option.selected .radio-circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 10px;
+    height: 10px;
+    background: #2271b1;
+    border-radius: 50%;
+}
+
+.awcdp-option .option-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.awcdp-option .option-label {
+    font-weight: 500;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.awcdp-option .option-description {
+    font-size: 13px;
+    color: #e67e22;
+    margin-top: 2px;
+}
+
+.awcdp-option .option-description .amount {
+    font-weight: 600;
+}
+
+.awcdp-payment-plans {
+    /* margin: 8px 0 8px 32px; */
+    margin: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.awcdp-payment-plan {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.awcdp-payment-plan:hover {
+    border-color: #ccc;
+}
+
+.awcdp-payment-plan.selected {
+    border-color: #22c55e;
+    box-shadow: 0 0 0 1px #22c55e;
+}
+
+.awcdp-plan-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.awcdp-plan-check {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.awcdp-plan-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.awcdp-plan-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1e1e1e;
+}
+
+.awcdp-plan-deposit {
+    font-size: 13px;
+    color: #e67e22;
+}
+
+.awcdp-plan-deposit .amount {
+    font-weight: 600;
+}
+
+.awcdp-plan-schedule {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.awcdp-schedule-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.awcdp-schedule-header .awcdp-schedule-date,
+.awcdp-schedule-header .awcdp-schedule-amount {
+    font-size: 12px;
+    font-weight: 500;
+    color: #666;
+    text-transform: uppercase;
+}
+
+.awcdp-schedule-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.awcdp-schedule-row:last-child {
+    border-bottom: none;
+}
+
+.awcdp-schedule-row .awcdp-schedule-date {
+    font-size: 14px;
+    color: #1e1e1e;
+}
+
+.awcdp-schedule-row .awcdp-schedule-amount {
+    font-size: 14px;
+    font-weight: 500;
+    color: #1e1e1e;
+}
+
+.awcdp-deposit-summary {
+    padding: 0;
+    /* margin: 16px 0 0 0; */
+    margin: 8px 0 0 0;
+    background: none !important;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    padding-top: 12px;
+}
+
+.awcdp-summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* padding: 8px 0; */
+    padding: 8px 16px;
+    margin: 0;
+    background: none !important;
+    border: none;
+}
+
+.awcdp-summary-row .label {
+    font-weight: 400;
+    color: #1e1e1e;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.awcdp-summary-row .value {
+    font-weight: 400;
+    color: #1e1e1e;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.awcdp-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: 8px;
+}
+
+.awcdp-spinner {
+    display: block;
+    width: 24px;
+    height: 24px;
+    border: 3px solid #e0e0e0;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: awcdp-spin 1s linear infinite;
+}
+
+@keyframes awcdp-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.wc-block-components-totals-wrapper .awcdp-blocks-deposit-slider {
+    margin: 0 0 16px 0;
+}
+
+.wc-block-checkout__sidebar .awcdp-blocks-deposit-slider {
+    background: #f8f9fa;
+}
+
+.wp-block-woocommerce-checkout-order-summary-block .awcdp-blocks-deposit-slider,
+.wc-block-components-order-summary .awcdp-blocks-deposit-slider {
+    /* margin: 16px 0; */
+    margin: 0px;
+}
+
+.wc-block-awcdp-totals {
+    margin: 0;
+    padding: 0;
+    background: transparent !important;
+}
+
+.wc-block-awcdp-totals .wc-block-components-totals-item {
+    background: transparent !important;
+    background-color: transparent !important;
+    padding: 12px 0;
+    margin: 0;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.wc-block-awcdp-totals .wc-block-components-totals-item:last-child {
+    border-bottom: none;
+}
+
+.awcdp-partial-payments-details {
+    font-size: 14px;
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.awcdp-partial-payments-details .wc-block-components-totals-item__label,
+.awcdp-partial-payments-details .wc-block-components-totals-item__value {
+    font-weight: 400 !important;
+    color: #1e1e1e !important;
+    font-size: 14px !important;
+}
+
+.wc-block-components-totals-wrapper .awcdp-partial-payments-details,
+.wc-block-awcdp-totals .awcdp-partial-payments-details {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+.awcdp-deposit-amount.wc-block-components-totals-item,
+.awcdp-future-amount.wc-block-components-totals-item {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+@media (max-width: 480px) {
+    .awcdp-payment-plans {
+        margin-left: 0;
+    }
+    
+    .awcdp-schedule-header,
+    .awcdp-schedule-row {
+        flex-wrap: wrap;
+    }
+}
+
+
+.wc-block-awcdp-totals .wc-block-components-totals-item.awcdp-partial-payments-details {
+    padding: 12px 16px !important;
+}

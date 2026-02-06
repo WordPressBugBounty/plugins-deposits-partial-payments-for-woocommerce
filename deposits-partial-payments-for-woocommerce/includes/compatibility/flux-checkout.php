@@ -28,6 +28,8 @@ if ( ! class_exists( 'Comp_Iconic_Flux_Checkout' ) ) {
 			add_action( 'flux_thankyou_before_product_details', array( $this, 'flux_thankyou_awcdp_show__summary' ),10 );
 			add_action( 'wp_head', array( $this, 'flux_thankyou_head_css' ) );
 
+			add_filter( 'woocommerce_update_order_review_fragments', array( $this, 'update_order_review_framents'), 10, 1 );
+
 		}
 
 		function flux_thankyou_awcdp_show__summary( $order ) {
@@ -145,6 +147,50 @@ if ( ! class_exists( 'Comp_Iconic_Flux_Checkout' ) ) {
 			</style>	
 			<?php
 		}
+	}
+
+
+	function update_order_review_framents( $fragments ) { 
+		$fragments['.flux-review-customer'] = Iconic_Flux_Steps::get_review_customer_fragment();
+		
+		// Heading with cart item count.
+		ob_start();
+		wc_get_template( 'checkout/cart-heading.php' );
+		$fragments['.flux-heading--order-review'] = ob_get_clean();
+	
+		$get_total = WC()->cart->get_total(); 
+			$awcdp_gs = get_option('awcdp_general_settings');
+		$checkout_mode = ( isset($awcdp_gs['checkout_mode']) ) ? $awcdp_gs['checkout_mode'] : false;
+	
+		if($checkout_mode) {
+		$display_rows = false;
+		if ( isset($_POST['post_data'] )) {
+			parse_str($_POST['post_data'], $post_data);
+			$display_rows = isset($post_data['awcdp_deposit_option']) && $post_data['awcdp_deposit_option'] == 'deposit';
+		}
+		if ( $display_rows ) {
+			if( isset(WC()->cart->deposit_info, WC()->cart->deposit_info['deposit_enabled'] ) && WC()->cart->deposit_info['deposit_enabled'] == true  ) {
+				$get_total = wc_price(WC()->cart->deposit_info['deposit_amount']);
+			}
+		}
+		} else if ( !$checkout_mode && (isset(WC()->cart->deposit_info['deposit_enabled']) && WC()->cart->deposit_info['deposit_enabled'] === true))  {
+	
+			$get_total = wc_price(WC()->cart->deposit_info['deposit_amount']) ;
+			
+		}
+	
+		$new_fragments = array(
+			'total'        => $get_total,
+			'shipping_row' => Iconic_Flux_Steps::get_shipping_row_mobile(),
+		);
+	
+		if ( isset( $fragments['flux'] ) ) {
+			$fragments['flux'] = array_merge( $fragments['flux'], $new_fragments );
+		} else {
+			$fragments['flux'] = $new_fragments;
+		}
+		
+		return $fragments;
 	}
 		
 
