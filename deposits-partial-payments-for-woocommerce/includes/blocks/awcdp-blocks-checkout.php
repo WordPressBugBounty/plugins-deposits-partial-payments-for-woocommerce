@@ -23,7 +23,41 @@ class AWCDP_Blocks_Checkout {
 
         add_action('woocommerce_thankyou', array(__CLASS__, 'show_blocks_thankyou_partial_payments'), 5, 1);
         add_action('woocommerce_order_details_after_order_table', array(__CLASS__, 'show_blocks_order_partial_payments_summary'), 5, 1);
+		
+		add_action( 'woocommerce_store_api_checkout_update_order_from_request', array(__CLASS__, 'set_order_total_to_deposit_for_blocks' ), 8, 2 );
+
     }
+
+    	
+	 public static function set_order_total_to_deposit_for_blocks( $order, $request ) {
+		if ( ! $order || ! WC()->cart || ! WC()->session ) {
+			return;
+		}
+
+		// Only act when deposit (not full payment) is selected
+		$deposit_option = WC()->session->get( 'awcdp_deposit_option' );
+		if ( $deposit_option !== 'deposit' ) {
+			return;
+		}
+
+		// Ensure deposit_info is populated
+		if ( ! isset( WC()->cart->deposit_info['deposit_amount'] )
+			|| WC()->cart->deposit_info['deposit_amount'] <= 0 ) {
+			return;
+		}
+
+		// Only proceed if deposit is actually enabled
+		if ( empty( WC()->cart->deposit_info['deposit_enabled'] ) ) {
+			return;
+		}
+
+		$deposit_amount = floatval( WC()->cart->deposit_info['deposit_amount'] );
+
+		// Set the WC_Order total to the deposit amount so Mollie charges correctly
+		$order->set_total( $deposit_amount );
+		// Don't save yet — the Store API will save after all hooks complete
+	}
+
 
     private static function is_full_payment_selected() {
         if (!WC()->session) {
