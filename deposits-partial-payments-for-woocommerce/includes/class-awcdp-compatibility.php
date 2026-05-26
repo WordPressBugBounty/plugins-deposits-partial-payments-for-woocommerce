@@ -78,6 +78,11 @@ class AWCDP_Compatibility
             require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR . 'compatibility/klarna-payments.php';
         }
 
+        if ( class_exists( 'WC_Stripe' ) ) { 
+            require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR . 'compatibility/woocommerce-gateway-stripe.php';
+        }
+
+
 	}
 		
     public function awcdp_wc_register_custom_post_status() {

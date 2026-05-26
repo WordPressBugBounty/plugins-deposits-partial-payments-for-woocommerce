@@ -610,7 +610,7 @@ class AWCDP_Front_End
                         // my-edit 04-12-21
                         if (wc_prices_include_tax() && isset($cart_item_data['awcdp_deposit']['original_price']) ) {
                           // uncommented this to fix deposit calculation when prices include tax - 03-02-2026
-                         $amount = $cart_item_data['awcdp_deposit']['original_price'];
+                         $amount = $cart_item_data['awcdp_deposit']['original_price'] * $quantity;
                         }
                         // my-edit 04-12-21
                           $deposit = $amount * (floatval($deposit_amount_meta) / 100.0);

@@ -5,8 +5,8 @@ Contributors: acowebs, saneshacodez
 Donate link:
 Tags: WooCommerce, Deposit, Woocommerce deposits, Payment, installments
 Requires at least: 4.0
-Tested up to: 6.9
-Stable tag: 1.2.8
+Tested up to: 7.0
+Stable tag: 1.2.9
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -128,6 +128,8 @@ With the partial payment WooCommerce plugin free version, you can gather the dep
 Yes, with the Woocommerce Deposits & Partial Payments plugin, the deposits are refundable but it needs to be refunded manually from the order placed.
 
 == Changelog ==
+= 1.2.9 =
+* Support for WordPress 7
 = 1.2.8 =
 * Support for WooCommerce 10.7
 * Bug fix
