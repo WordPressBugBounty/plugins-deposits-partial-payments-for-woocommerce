@@ -78,8 +78,20 @@ class AWCDP_Compatibility
             require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR . 'compatibility/klarna-payments.php';
         }
 
+        if ( class_exists( 'WPCleverWpcbn' ) || in_array('wpc-buy-now-button/wpc-buy-now-button.php', apply_filters('active_plugins', get_option('active_plugins'))) ) {
+            require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR . 'compatibility/wpc-buy-now-button.php';
+        }
+        
         if ( class_exists( 'WC_Stripe' ) ) { 
             require_once realpath(plugin_dir_path(__FILE__)) . DIRECTORY_SEPARATOR . 'compatibility/woocommerce-gateway-stripe.php';
+        }
+        
+        if (in_array('woocommerce-paypal-payments/woocommerce-paypal-payments.php', apply_filters('active_plugins', get_option('active_plugins')))  ) {
+            require_once realpath( plugin_dir_path( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'compatibility/woocommerce-paypal-payments.php';
+        }
+
+        if (in_array('woocommerce-square/woocommerce-square.php', apply_filters('active_plugins', get_option('active_plugins')))  ) {
+            require_once realpath( plugin_dir_path( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'compatibility/woocommerce-square.php';
         }
 
 

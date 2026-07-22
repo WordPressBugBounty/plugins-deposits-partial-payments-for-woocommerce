@@ -14,5 +14,6 @@ return array(
         'wc-price-format',
         'wc-settings',
     ),
-    'version' => '1.0.0',
+    // 'version' => '1.0.0',
+    'version' => defined('AWCDP_VERSION') ? AWCDP_VERSION : '1.0.0',
 );
