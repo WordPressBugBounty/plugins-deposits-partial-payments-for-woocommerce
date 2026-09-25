@@ -15,6 +15,8 @@ class Comp_WooCommerce_Gateway_Stripe {
 
     private static $instance = null;
 
+    private $original_cart_total_for_fragments = null;
+
     public static function get_instance() {
         if ( null === self::$instance ) {
             self::$instance = new self();
@@ -24,7 +26,12 @@ class Comp_WooCommerce_Gateway_Stripe {
 
     private function __construct() {
 
-        add_filter( 'woocommerce_calculated_total', array( $this, 'override_cart_total_for_store_api' ), 999999, 2 );
+        add_filter( 'woocommerce_calculated_total', array( $this, 'override_cart_total_for_stripe_checkout_session' ), 999999, 2 );
+
+        add_filter( 'woocommerce_update_order_review_fragments', array( $this, 'prepare_cart_total_for_stripe_fragments' ), 15 );
+        add_filter( 'woocommerce_update_order_review_fragments', array( $this, 'restore_cart_total_after_stripe_fragments' ), 25 );
+
+        add_action( 'woocommerce_checkout_order_processed', array( $this, 'ensure_checkout_session_matches_deposit_order' ), 10, 3 );
 
         add_filter( 'wc_stripe_payment_request_product_data', array( $this, 'override_product_page_total' ), 10, 2 );
 
@@ -43,13 +50,22 @@ class Comp_WooCommerce_Gateway_Stripe {
 
     }
 
-    function override_cart_total_for_store_api( $cart_total, $cart ) {
-        if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
-            return $cart_total;
-        }
-        if ( ! $this->is_store_api_cart_request() ) {
-            return $cart_total;
-        }
+    /**
+     * Override cart total to the deposit amount for Stripe Checkout Session contexts.
+     *
+     * This covers:
+     * - Store API cart/checkout REST requests (blocks checkout)
+     * - Stripe Checkout Session create/update AJAX requests
+     *
+     * Note: We do NOT override woocommerce_calculated_total during normal classic
+     * checkout update_order_review rendering, because the order review table needs
+     * WC()->cart->get_total('edit') to be the full cart total in order to display
+     * the correct "Total" and "Future payments" amounts ($total - $deposit).
+     * Instead, for classic checkout, we isolate the total override to the
+     * woocommerce_update_order_review_fragments filter (priorities 15-25), which runs
+     * after the table HTML is generated and right when Stripe's session synchronize() runs.
+     */
+    function override_cart_total_for_stripe_checkout_session( $cart_total, $cart ) {
         if ( ! $this->is_deposit_info_enabled() ) {
             return $cart_total;
         }
@@ -57,7 +73,123 @@ class Comp_WooCommerce_Gateway_Stripe {
         if ( $deposit_amount <= 0 || $deposit_amount >= $cart_total ) {
             return $cart_total;
         }
-        return $deposit_amount;
+
+        // Store API (blocks checkout) — covers cart, checkout, and session sync endpoints.
+        if ( defined( 'REST_REQUEST' ) && REST_REQUEST && $this->is_store_api_cart_request() ) {
+            return $deposit_amount;
+        }
+
+        // Stripe Checkout Session AJAX (create/update session).
+        if ( $this->is_stripe_checkout_session_ajax() ) {
+            return $deposit_amount;
+        }
+
+        return $cart_total;
+    }
+
+    /**
+     * Temporarily set the cart total to the deposit amount before Stripe's
+     * Checkout Session synchronization runs on classic checkout fragments.
+     * Runs at priority 15 (Stripe's add_classic_fragment runs at priority 20).
+     * At this point, the order review HTML table has already been rendered with
+     * the full cart total, so Future Payments ($total - $deposit) remains correct.
+     */
+    public function prepare_cart_total_for_stripe_fragments( $fragments ) {
+        if ( ! $this->is_deposit_info_enabled() || ! $this->is_stripe_optimized_checkout_active() ) {
+            return $fragments;
+        }
+
+        $deposit_amount = floatval( WC()->cart->deposit_info['deposit_amount'] );
+        if ( $deposit_amount <= 0 ) {
+            return $fragments;
+        }
+
+        $this->original_cart_total_for_fragments = WC()->cart->total;
+        WC()->cart->total                        = $deposit_amount;
+
+        add_filter( 'woocommerce_calculated_total', array( $this, 'return_deposit_amount_during_fragments' ), 999999, 2 );
+
+        return $fragments;
+    }
+
+    public function return_deposit_amount_during_fragments( $total, $cart ) {
+        if ( $this->is_deposit_info_enabled() ) {
+            $deposit_amount = floatval( WC()->cart->deposit_info['deposit_amount'] );
+            if ( $deposit_amount > 0 ) {
+                return $deposit_amount;
+            }
+        }
+        return $total;
+    }
+
+    /**
+     * Restore the original cart total after Stripe's session synchronization.
+     * Runs at priority 25 (after Stripe's add_classic_fragment at priority 20).
+     */
+    public function restore_cart_total_after_stripe_fragments( $fragments ) {
+        remove_filter( 'woocommerce_calculated_total', array( $this, 'return_deposit_amount_during_fragments' ), 999999 );
+
+        if ( null !== $this->original_cart_total_for_fragments && isset( WC()->cart ) ) {
+            WC()->cart->total                        = $this->original_cart_total_for_fragments;
+            $this->original_cart_total_for_fragments = null;
+        }
+
+        return $fragments;
+    }
+
+    /**
+     * Ensure the Stripe Checkout Session context amount matches the deposit sub-order
+     * total right after the order is processed, before Stripe's process_payment() runs.
+     *
+     * In WooCommerce classic checkout, the deposit plugin creates a parent order (full total)
+     * and a deposit sub-order (deposit total) and returns the sub-order ID. Stripe's
+     * process_payment_with_checkout_session() runs validate_for_order(), which checks
+     * that the session context's amount matches the order total. This hook guarantees
+     * that the context amount in cache matches the sub-order amount, preventing the error:
+     * "The payment amount no longer matches the order total. Please refresh the page and try again."
+     */
+    public function ensure_checkout_session_matches_deposit_order( $order_id, $posted_data, $order ) {
+        if ( ! class_exists( 'WC_Stripe_Checkout_Session_Context' ) ) {
+            return;
+        }
+
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing
+        $checkout_session_id = isset( $_POST['wc_stripe_checkout_session_id'] )
+            ? sanitize_text_field( wp_unslash( $_POST['wc_stripe_checkout_session_id'] ) )
+            : '';
+
+        if ( empty( $checkout_session_id ) ) {
+            return;
+        }
+
+        $order_obj = is_a( $order, 'WC_Order' ) ? $order : wc_get_order( $order_id );
+        if ( ! $order_obj ) {
+            return;
+        }
+
+        $is_deposit_order = ( $order_obj->get_type() === 'awcdp_payment' )
+            || ( $order_obj->get_parent_id() > 0 )
+            || ( 'yes' === $order_obj->get_meta( '_awcdp_deposits_order_has_deposit', true ) );
+
+        if ( ! $is_deposit_order && ! $this->is_deposit_info_enabled() ) {
+            return;
+        }
+
+        $context = WC_Stripe_Checkout_Session_Context::get_context( $checkout_session_id );
+        if ( ! is_array( $context ) ) {
+            return;
+        }
+
+        $currency     = strtolower( $order_obj->get_currency() );
+        $order_amount = class_exists( 'WC_Stripe_Helper' )
+            ? WC_Stripe_Helper::get_stripe_amount( (float) $order_obj->get_total(), $currency )
+            : intval( round( (float) $order_obj->get_total() * 100 ) );
+
+        if ( (int) ( $context['amount'] ?? 0 ) !== $order_amount ) {
+            $context['amount']   = $order_amount;
+            $context['currency'] = $currency;
+            WC_Stripe_Checkout_Session_Context::set_context( $checkout_session_id, $context );
+        }
     }
 
 
@@ -408,6 +540,42 @@ class Comp_WooCommerce_Gateway_Stripe {
             strpos( $route, '/wc/store/v1/cart' ) === 0
             || strpos( $route, '/wc/store/v1/checkout' ) === 0
         );
+    }
+
+    /**
+     * Check if the current request is a classic checkout AJAX request.
+     * Covers: update_order_review (order review refresh) and checkout (place order).
+     */
+    private function is_classic_checkout_ajax() {
+        if ( ! wp_doing_ajax() ) {
+            return false;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification
+        $wc_ajax = isset( $_GET['wc-ajax'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) : '';
+        return in_array( $wc_ajax, array( 'update_order_review', 'checkout' ), true );
+    }
+
+    /**
+     * Check if the current request is a Stripe Checkout Session AJAX request.
+     */
+    private function is_stripe_checkout_session_ajax() {
+        if ( ! wp_doing_ajax() ) {
+            return false;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification
+        $wc_ajax = isset( $_GET['wc-ajax'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-ajax'] ) ) : '';
+        return in_array( $wc_ajax, array( 'wc_stripe_create_checkout_session', 'wc_stripe_update_checkout_session' ), true );
+    }
+
+    /**
+     * Check if Stripe Optimized Checkout Suite (Checkout Sessions) is active.
+     * This is backward compatible — returns false for older Stripe plugin versions
+     * that don't have the Checkout Session Manager.
+     */
+    private function is_stripe_optimized_checkout_active() {
+        // WC_Stripe_Checkout_Session_Manager only exists in Stripe plugin v10.6+
+        // with Optimized Checkout Suite enabled.
+        return class_exists( 'WC_Stripe_Checkout_Session_Manager' );
     }
 
     function is_deposit_info_enabled() {
