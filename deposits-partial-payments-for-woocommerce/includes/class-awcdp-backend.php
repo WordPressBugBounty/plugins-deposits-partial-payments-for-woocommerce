@@ -119,9 +119,6 @@ class AWCDP_Backend
 
         add_action('woocommerce_process_product_meta', array($this, 'awcdp_process_product_meta'));
 
-        // deactivation form
-        add_action('admin_footer', array($this, 'awcdp_deactivation_form'));
-
 		}
 
     }
@@ -243,10 +240,6 @@ class AWCDP_Backend
         $screen = get_current_screen();
 
         wp_enqueue_script('jquery');
-        // deactivation form js
-        if ( $screen->id == 'plugins' ) {
-            wp_enqueue_script($this->_token . '-deactivation-message', esc_url($this->assets_url).'js/message.js', array());
-        }
 
         $payment_gateways = WC()->payment_gateways->payment_gateways();
         $payment_gateway_options = array();
@@ -703,61 +696,6 @@ class AWCDP_Backend
        }
 
     }
-
-
-
-              /**
-               * Deactivation form
-              */
-              public function awcdp_deactivation_form() {
-                $currentScreen = get_current_screen();
-                $screenID = $currentScreen->id;
-                if ( $screenID == 'plugins' ) {
-                    $view = '<div id="awcdp-survey-form-wrap"><div id="awcdp-survey-form">
-                    <p>If you have a moment, please let us know why you are deactivating this plugin. All submissions are anonymous and we only use this feedback for improving our plugin.</p>
-                    <form method="POST">
-                        <input name="Plugin" type="hidden" placeholder="Plugin" value="'.AWCDP_TOKEN.'" required>
-                        <input name="Version" type="hidden" placeholder="Version" value="'.AWCDP_VERSION.'" required>
-                        <input name="Date" type="hidden" placeholder="Date" value="'.date("m/d/Y").'" required>
-                        <input name="Website" type="hidden" placeholder="Website" value="'.get_site_url().'" required>
-                        <input name="Title" type="hidden" placeholder="Title" value="'.get_bloginfo( 'name' ).'" required>
-                        <input type="radio" id="'.$this->_token.'-temporarily" name="Reason" value="I\'m only deactivating temporarily">
-                <label for="'.$this->_token.'-temporarily">I\'m only deactivating temporarily</label><br>
-                <input type="radio" id="'.$this->_token.'-notneeded" name="Reason" value="I no longer need the plugin">
-                <label for="'.$this->_token.'-notneeded">I no longer need the plugin</label><br>
-                <input type="radio" id="'.$this->_token.'-short" name="Reason" value="I only needed the plugin for a short period">
-                <label for="'.$this->_token.'-short">I only needed the plugin for a short period</label><br>
-                <input type="radio" id="'.$this->_token.'-better" name="Reason" value="I found a better plugin">
-                <label for="'.$this->_token.'-better">I found a better plugin</label><br>
-                <input type="radio" id="'.$this->_token.'-upgrade" name="Reason" value="Upgrading to PRO version">
-                <label for="'.$this->_token.'-upgrade">Upgrading to PRO version</label><br>
-                <input type="radio" id="'.$this->_token.'-requirement" name="Reason" value="Plugin doesn\'t meets my requirement">
-                <label for="'.$this->_token.'-requirement">Plugin doesn\'t meets my requirement</label><br>
-                <input type="radio" id="'.$this->_token.'-broke" name="Reason" value="Plugin broke my site">
-                <label for="'.$this->_token.'-broke">Plugin broke my site</label><br>
-                <input type="radio" id="'.$this->_token.'-stopped" name="Reason" value="Plugin suddenly stopped working">
-                <label for="'.$this->_token.'-stopped">Plugin suddenly stopped working</label><br>
-                <input type="radio" id="'.$this->_token.'-bug" name="Reason" value="I found a bug">
-                <label for="'.$this->_token.'-bug">I found a bug</label><br>
-                <input type="radio" id="'.$this->_token.'-other" name="Reason" value="Other">
-                <label for="'.$this->_token.'-other">Other</label><br>
-                        <p id="awcdp-error"></p>
-                        <div class="awcdp-comments" style="display:none;">
-                            <textarea type="text" name="Comments" placeholder="Please specify" rows="2"></textarea>
-                            <p>For support queries <a href="https://support.acowebs.com/portal/en/newticket?departmentId=361181000000006907&layoutId=361181000000074011" target="_blank">Submit Ticket</a></p>
-                        </div>
-                        <button type="submit" class="awcdp_button" id="awcdp_deactivate">Submit & Deactivate</button>
-                        <a href="#" class="awcdp_button" id="awcdp_cancel">Cancel</a>
-                        <a href="#" class="awcdp_button" id="awcdp_skip">Skip & Deactivate</a>
-                    </form></div></div>';
-                    echo $view;
-                } ?>
-                <style>
-                    #awcdp-survey-form-wrap{ display: none;position: absolute;top: 0px;bottom: 0px;left: 0px;right: 0px;z-index: 10000;background: rgb(0 0 0 / 63%); } #awcdp-survey-form{ display:none;margin-top: 15px;position: fixed;text-align: left;width: 40%;max-width: 600px;z-index: 100;top: 50%;left: 50%;transform: translate(-50%, -50%);background: rgba(255,255,255,1);padding: 35px;border-radius: 6px;border: 2px solid #fff;font-size: 14px;line-height: 24px;outline: none;}#awcdp-survey-form p{font-size: 14px;line-height: 24px;padding-bottom:20px;margin: 0;} #awcdp-survey-form .awcdp_button { margin: 25px 5px 10px 0px; height: 42px;border-radius: 6px;background-color: #1eb5ff;border: none;padding: 0 36px;color: #fff;outline: none;cursor: pointer;font-size: 15px;font-weight: 600;letter-spacing: 0.1px;color: #ffffff;margin-left: 0 !important;position: relative;display: inline-block;text-decoration: none;line-height: 42px;} #awcdp-survey-form .awcdp_button#awcdp_deactivate{background: #fff;border: solid 1px rgba(88,115,149,0.5);color: #a3b2c5;} #awcdp-survey-form .awcdp_button#awcdp_skip{background: #fff;border: none;color: #a3b2c5;padding: 0px 15px;float:right;} #awcdp-survey-form .awcdp_button[disabled] { cursor: no-drop; }#awcdp-survey-form .awcdp-comments{position: relative;}#awcdp-survey-form .awcdp-comments p{ position: absolute; top: -24px; right: 0px; font-size: 14px; padding: 0px; margin: 0px;} #awcdp-survey-form .awcdp-comments p a{text-decoration:none;}#awcdp-survey-form .awcdp-comments textarea{background: #fff;border: solid 1px rgba(88,115,149,0.5);width: 100%;line-height: 30px;resize:none;margin: 10px 0 0 0;} #awcdp-survey-form p#awcdp-error{margin-top: 10px;padding: 0px;font-size: 13px;color: #ea6464;}
-                </style>
-            <?php }
-
-
 
 
 

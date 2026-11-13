@@ -1,0 +1,1034 @@
+/*!
+ * Acowebs feedback UI kit, v1.0.0
+ * Deactivation feedback popup + newsletter opt-in notice for Acowebs WordPress plugins.
+ *
+ * - Everything is scoped under `.acofb` and prefixed `acofb-`, so it never touches wp-admin or other plugins.
+ * - No @import, no web fonts, no external images. Uses the WordPress admin system font stack.
+ * - Interactivity is CSS-only (:checked, sibling selectors, :invalid): the selected reason card, its
+ *   details box, the contact fields and the Send button's enabled look need no JavaScript.
+ * - `.acofb-annotate` on a root is for previews only: it labels every [data-api-field] element.
+ *
+ * Docs: docs/ui-kit/README.md
+ */
+
+/* ---------- Tokens (override on .acofb to theme) ---------- */
+
+.acofb {
+  --acofb-primary: #016fff;        /* brand blue: accents, selected states */
+  --acofb-button: #0167ee;         /* brand blue, 4% darker so white button text passes AA (5.0:1) */
+  --acofb-button-hover: #0058d6;
+  --acofb-link: #0058d6;           /* blue text on light surfaces (AA) */
+  --acofb-navy: #0b1033;           /* text */
+  --acofb-indigo: #111852;
+  --acofb-cyan: #08aeea;
+  --acofb-mint: #00dfb1;
+  --acofb-gold: #f9c626;
+  --acofb-muted: #627387;          /* secondary text on white (4.9:1) */
+  --acofb-ink-soft: #3d4b5f;       /* text buttons */
+  --acofb-border: #d9e1ec;         /* card and divider lines */
+  --acofb-control-border: #7d8ca0; /* input, radio and checkbox outlines (3:1 on white and on the panel) */
+  --acofb-tint: #f7fafc;           /* page tint */
+  --acofb-panel: #eef5ff;          /* newsletter form panel, selected reason */
+  --acofb-panel-border: #d3e3fb;
+  --acofb-surface: #ffffff;
+  --acofb-overlay: rgba(11, 16, 51, 0.55);
+
+  --acofb-radius: 10px;            /* controls */
+  --acofb-radius-card: 14px;       /* cards and the modal */
+  --acofb-shadow: 0 1px 2px rgba(11, 16, 51, 0.06), 0 4px 12px rgba(11, 16, 51, 0.05);
+  --acofb-shadow-modal: 0 4px 8px rgba(11, 16, 51, 0.08), 0 24px 64px rgba(11, 16, 51, 0.28);
+  --acofb-ring: 0 0 0 3px rgba(1, 111, 255, 0.35);
+  --acofb-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --acofb-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  color-scheme: light;
+  font-family: var(--acofb-font);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--acofb-navy);
+  text-align: start;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ---------- Scoped reset (beats wp-admin's element styles) ---------- */
+
+.acofb,
+.acofb *,
+.acofb *::before,
+.acofb *::after {
+  box-sizing: border-box;
+}
+
+.acofb :where(h2, h3, p, ul, li, fieldset, legend, form, label) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: normal;
+}
+
+.acofb :where(ul) {
+  list-style: none;
+}
+
+.acofb :where(fieldset) {
+  min-width: 0;
+}
+
+.acofb :where(svg) {
+  display: block;
+  flex-shrink: 0;
+}
+
+.acofb[hidden],
+.acofb [hidden] {
+  display: none !important;
+}
+
+/* Visually hidden, still read by screen readers. */
+.acofb .acofb-sr {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Honeypot: off-screen, not type="hidden" (bots skip hidden inputs). */
+.acofb .acofb-hp {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* ---------- Logo badge ---------- */
+
+.acofb .acofb-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--acofb-surface);
+  border: 1px solid var(--acofb-border);
+  box-shadow: 0 2px 6px rgba(11, 16, 51, 0.08);
+}
+
+.acofb .acofb-badge svg {
+  width: 26px;
+  height: 26px;
+}
+
+.acofb .acofb-badge--lg {
+  width: 56px;
+  height: 56px;
+}
+
+.acofb .acofb-badge--lg svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* ---------- Text ---------- */
+
+.acofb .acofb-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--acofb-link);
+}
+
+.acofb .acofb-headline {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--acofb-navy);
+}
+
+.acofb .acofb-title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--acofb-navy);
+}
+
+.acofb .acofb-text {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--acofb-navy);
+}
+
+.acofb .acofb-sub {
+  margin-top: 4px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--acofb-muted);
+}
+
+/* Status line under the newsletter buttons ("Subscribing…", or an error). Empty = takes no space. */
+.acofb .acofb-msg {
+  margin: 8px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--acofb-muted);
+}
+.acofb .acofb-msg:empty {
+  display: none;
+}
+.acofb .acofb-msg--error {
+  color: #b42318;
+}
+
+.acofb .acofb-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--acofb-muted);
+}
+
+.acofb .acofb-privacy svg {
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  color: var(--acofb-muted);
+}
+
+.acofb .acofb-link {
+  color: var(--acofb-link);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  border-radius: 3px;
+  box-shadow: none;
+  outline: none;
+}
+
+.acofb .acofb-link:hover {
+  color: var(--acofb-navy);
+}
+
+.acofb .acofb-link:focus-visible {
+  box-shadow: var(--acofb-ring);
+}
+
+/* ---------- Form controls ---------- */
+
+.acofb .acofb-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.acofb .acofb-label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--acofb-navy);
+  cursor: default;
+}
+
+.acofb .acofb-label .acofb-optional {
+  font-weight: 400;
+  color: var(--acofb-muted);
+}
+
+.acofb .acofb-input,
+.acofb .acofb-textarea {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-height: 40px;
+  margin: 0;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--acofb-navy);
+  background: var(--acofb-surface);
+  border: 1px solid var(--acofb-control-border);
+  border-radius: var(--acofb-radius);
+  box-shadow: none;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.acofb .acofb-input {
+  height: 40px;
+}
+
+.acofb .acofb-textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.acofb .acofb-input::placeholder,
+.acofb .acofb-textarea::placeholder {
+  color: var(--acofb-muted);
+  opacity: 1;
+}
+
+.acofb .acofb-input:hover,
+.acofb .acofb-textarea:hover {
+  border-color: var(--acofb-ink-soft);
+}
+
+.acofb .acofb-input:focus,
+.acofb .acofb-textarea:focus {
+  border-color: var(--acofb-primary);
+  box-shadow: var(--acofb-ring);
+  outline: none;
+}
+
+/* Radio and checkbox: real inputs, restyled. ::before is reset because wp-admin draws its own marks there. */
+.acofb .acofb-radio,
+.acofb .acofb-check {
+  -webkit-appearance: none;
+  appearance: none;
+  display: inline-block;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  margin: 0;
+  padding: 0;
+  background: var(--acofb-surface) no-repeat center / 12px 12px;
+  border: 1.5px solid var(--acofb-control-border);
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  vertical-align: middle;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.acofb .acofb-radio::before,
+.acofb .acofb-check::before,
+.acofb .acofb-radio::after,
+.acofb .acofb-check::after {
+  content: none;
+  display: none;
+}
+
+.acofb .acofb-radio {
+  border-radius: 50%;
+}
+
+.acofb .acofb-check {
+  border-radius: 5px;
+}
+
+.acofb .acofb-radio:checked {
+  border-color: var(--acofb-primary);
+  background-color: var(--acofb-primary);
+  box-shadow: inset 0 0 0 3.5px var(--acofb-surface);
+}
+
+.acofb .acofb-check:checked {
+  border-color: var(--acofb-primary);
+  background-color: var(--acofb-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+.acofb .acofb-check:focus-visible {
+  box-shadow: var(--acofb-ring);
+}
+
+.acofb .acofb-radio:focus-visible {
+  box-shadow: inset 0 0 0 3.5px var(--acofb-surface), var(--acofb-ring);
+}
+
+/* ---------- Buttons ---------- */
+
+.acofb .acofb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  min-height: 40px;
+  margin: 0;
+  padding: 0 18px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--acofb-radius);
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.acofb .acofb-btn:focus-visible {
+  box-shadow: var(--acofb-ring);
+}
+
+.acofb .acofb-btn--primary {
+  color: #fff;
+  background: var(--acofb-button);
+  box-shadow: 0 1px 2px rgba(1, 88, 214, 0.25);
+}
+
+.acofb .acofb-btn--primary:hover {
+  color: #fff;
+  background: var(--acofb-button-hover);
+}
+
+.acofb .acofb-btn--primary:focus-visible {
+  box-shadow: 0 1px 2px rgba(1, 88, 214, 0.25), var(--acofb-ring);
+}
+
+.acofb .acofb-btn--primary:active {
+  transform: translateY(1px);
+}
+
+.acofb .acofb-btn--text {
+  padding: 0 12px;
+  color: var(--acofb-ink-soft);
+  background: transparent;
+}
+
+.acofb .acofb-btn--text:hover {
+  color: var(--acofb-navy);
+  background: rgba(11, 16, 51, 0.06);
+}
+
+.acofb .acofb-btn[disabled],
+.acofb .acofb-btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.acofb .acofb-btn-arrow {
+  font-size: 16px;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.acofb .acofb-btn:hover .acofb-btn-arrow {
+  transform: translateX(2px);
+}
+
+/* Icon button (close X). */
+.acofb .acofb-close {
+  position: absolute;
+  top: 12px;
+  inset-inline-end: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  margin: 0;
+  padding: 0;
+  color: var(--acofb-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: none;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.acofb .acofb-close:hover {
+  color: var(--acofb-navy);
+  background: rgba(11, 16, 51, 0.06);
+}
+
+.acofb .acofb-close:focus-visible {
+  box-shadow: var(--acofb-ring);
+}
+
+.acofb .acofb-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* =====================================================================
+ * Newsletter opt-in notice
+ * ===================================================================== */
+
+.acofb.acofb-notice {
+  position: relative;
+  margin: 16px 20px 16px 0;
+  padding: 28px 24px 24px;
+  background: var(--acofb-surface);
+  border: 1px solid var(--acofb-border);
+  border-radius: var(--acofb-radius-card);
+  box-shadow: var(--acofb-shadow);
+  overflow: hidden;
+  container: acofb-notice / inline-size; /* the layout follows the notice's own width */
+}
+
+/* A thin brand stripe along the top edge. */
+.acofb.acofb-notice::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--acofb-primary), var(--acofb-cyan) 55%, var(--acofb-mint));
+}
+
+.acofb .acofb-notice-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+  gap: 32px;
+  align-items: center;
+  padding-inline-end: 32px; /* room for the close button */
+}
+
+.acofb .acofb-intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  padding-inline-end: 8px;
+}
+
+.acofb .acofb-intro-copy {
+  min-width: 0;
+  max-width: 560px;
+}
+
+.acofb .acofb-intro-copy .acofb-text {
+  margin-top: 8px;
+}
+
+.acofb .acofb-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.acofb .acofb-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 28px;
+  margin: 0;
+  padding: 0 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  color: var(--acofb-navy);
+  border-radius: 999px;
+}
+
+.acofb .acofb-chip::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.acofb .acofb-chip--blue { background: rgba(1, 111, 255, 0.1); }
+.acofb .acofb-chip--blue::before { background: var(--acofb-primary); }
+.acofb .acofb-chip--mint { background: rgba(0, 223, 177, 0.18); }
+.acofb .acofb-chip--mint::before { background: #00b48f; }
+.acofb .acofb-chip--cyan { background: rgba(8, 174, 234, 0.14); }
+.acofb .acofb-chip--cyan::before { background: var(--acofb-cyan); }
+.acofb .acofb-chip--gold { background: rgba(249, 198, 38, 0.24); }
+.acofb .acofb-chip--gold::before { background: #e0a800; }
+
+.acofb .acofb-panel {
+  --acofb-muted: #566679; /* darker muted text on the tinted panel (5.4:1) */
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  background: var(--acofb-panel);
+  border: 1px solid var(--acofb-panel-border);
+  border-radius: 12px;
+}
+
+/* First name and phone side by side when the panel has room for both, stacked otherwise (no media query needed). */
+.acofb .acofb-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px 12px;
+}
+
+.acofb .acofb-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.acofb .acofb-panel .acofb-btn--primary {
+  flex: 1 1 auto;
+}
+
+/* Thank-you state */
+.acofb .acofb-thanks {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-inline-end: 40px;
+  outline: none;
+}
+
+.acofb .acofb-thanks-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  color: #057a62;
+  background: rgba(0, 223, 177, 0.2);
+}
+
+.acofb .acofb-thanks-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.acofb .acofb-thanks .acofb-title {
+  font-size: 18px;
+}
+
+/* Stack when the notice is narrow. The media query is the fallback for browsers without container queries. */
+@container acofb-notice (max-width: 820px) {
+  .acofb .acofb-notice-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding-inline-end: 0;
+  }
+
+  .acofb .acofb-panel {
+    max-width: 560px;
+  }
+
+  .acofb .acofb-intro {
+    padding-inline-end: 32px; /* clear the close button */
+  }
+}
+
+@media (max-width: 782px) {
+  .acofb .acofb-notice-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding-inline-end: 0;
+  }
+
+  .acofb .acofb-intro {
+    padding-inline-end: 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .acofb.acofb-notice {
+    margin: 12px 10px 12px 0;
+    padding: 20px 16px 16px;
+  }
+
+  .acofb .acofb-close {
+    top: 8px;
+    inset-inline-end: 8px;
+  }
+
+  .acofb .acofb-intro {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .acofb .acofb-badge--lg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .acofb .acofb-headline {
+    font-size: 19px;
+  }
+
+  .acofb .acofb-panel {
+    padding: 16px;
+  }
+}
+
+/* =====================================================================
+ * Deactivation feedback modal
+ * ===================================================================== */
+
+.acofb.acofb-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100100; /* above the wp-admin bar (99999) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--acofb-overlay);
+}
+
+.acofb .acofb-modal {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100vh - 48px);
+  max-height: calc(100dvh - 48px);
+  background: var(--acofb-surface);
+  border-radius: var(--acofb-radius-card);
+  box-shadow: var(--acofb-shadow-modal);
+  overflow: hidden;
+}
+
+.acofb .acofb-modal-form {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 auto;
+}
+
+.acofb .acofb-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px 24px 18px;
+}
+
+.acofb .acofb-modal-head .acofb-badge {
+  margin-top: 2px;
+}
+
+.acofb .acofb-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overscroll-behavior: contain;
+}
+
+/* Reasons: real radios in a fieldset; the card is the radio's label. */
+.acofb .acofb-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.acofb .acofb-reason {
+  position: relative;
+}
+
+.acofb .acofb-reason > .acofb-radio {
+  position: absolute;
+  top: 15px;
+  inset-inline-start: 16px;
+  z-index: 1;
+}
+
+.acofb .acofb-reason-card {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 12px 16px;
+  padding-inline-start: 46px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--acofb-navy);
+  background: var(--acofb-surface);
+  border: 1px solid var(--acofb-border);
+  border-radius: var(--acofb-radius);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.acofb .acofb-reason-card:hover,
+.acofb .acofb-reason > .acofb-radio:hover + .acofb-reason-card {
+  border-color: #a9bbd3;
+  background: var(--acofb-tint);
+}
+
+.acofb .acofb-reason > .acofb-radio:checked + .acofb-reason-card {
+  border-color: var(--acofb-primary);
+  background: var(--acofb-panel);
+  box-shadow: inset 0 0 0 1px var(--acofb-primary);
+}
+
+.acofb .acofb-reason > .acofb-radio:focus-visible + .acofb-reason-card {
+  box-shadow: var(--acofb-ring);
+}
+
+/* Inside a card the card carries the focus ring, so the radio drops its own. */
+.acofb .acofb-reason > .acofb-radio:focus-visible {
+  box-shadow: none;
+}
+
+.acofb .acofb-reason > .acofb-radio:checked:focus-visible {
+  box-shadow: inset 0 0 0 3.5px var(--acofb-surface);
+}
+
+.acofb .acofb-reason > .acofb-radio:checked:focus-visible + .acofb-reason-card {
+  box-shadow: inset 0 0 0 1px var(--acofb-primary), var(--acofb-ring);
+}
+
+/* The details box appears under the selected card only. */
+.acofb .acofb-details {
+  display: none;
+  margin-top: 8px;
+  padding-inline-start: 16px;
+}
+
+.acofb .acofb-reason > .acofb-radio:checked ~ .acofb-details {
+  display: flex;
+  animation: acofb-reveal 0.18s ease-out;
+}
+
+/* Contact: the checkbox, its label and the name/email fields are siblings, so CSS can show the fields. */
+.acofb .acofb-contact {
+  position: relative;
+  padding: 14px 16px;
+  background: var(--acofb-tint);
+  border: 1px solid var(--acofb-border);
+  border-radius: var(--acofb-radius);
+}
+
+.acofb .acofb-contact > .acofb-check {
+  position: absolute;
+  top: 16px;
+  inset-inline-start: 16px;
+}
+
+.acofb .acofb-check-label {
+  display: block;
+  padding-inline-start: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--acofb-navy);
+  cursor: pointer;
+}
+
+.acofb .acofb-contact-fields {
+  display: none;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.acofb .acofb-contact > .acofb-check:checked ~ .acofb-contact-fields {
+  display: grid;
+}
+
+.acofb .acofb-modal-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px;
+  background: var(--acofb-tint);
+  border-top: 1px solid var(--acofb-border);
+}
+
+.acofb .acofb-modal-foot .acofb-btn--cancel {
+  margin-inline-start: auto;
+}
+
+/*
+ * "Send" looks disabled until a reason is picked: the radios are `required`, so the form is :invalid
+ * until one is checked (or while a visible email is malformed). The plugin's JS enforces it.
+ */
+.acofb .acofb-modal-form:invalid .acofb-btn--send {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.acofb .acofb-modal-form:invalid .acofb-btn--send:hover {
+  background: var(--acofb-button);
+}
+
+@keyframes acofb-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 600px) {
+  .acofb.acofb-overlay {
+    align-items: flex-end;
+    padding: 12px 8px 8px;
+  }
+
+  .acofb .acofb-modal {
+    max-height: calc(100vh - 20px);
+    max-height: calc(100dvh - 20px);
+  }
+
+  .acofb .acofb-modal-head {
+    gap: 12px;
+    padding: 20px 16px 14px;
+  }
+
+  .acofb .acofb-modal-head .acofb-badge {
+    width: 40px;
+    height: 40px;
+  }
+
+  .acofb .acofb-modal-head .acofb-badge svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .acofb .acofb-title {
+    font-size: 17px;
+  }
+
+  .acofb .acofb-modal-body {
+    padding: 2px 16px 16px;
+  }
+
+  .acofb .acofb-details {
+    padding-inline-start: 0;
+  }
+
+  .acofb .acofb-contact-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .acofb .acofb-modal-foot {
+    padding: 12px 16px;
+  }
+
+  .acofb .acofb-modal-foot .acofb-btn--send {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acofb *,
+  .acofb *::before,
+  .acofb *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* =====================================================================
+ * Preview only: `.acofb-annotate` on a root labels every element that maps to an API field.
+ * Never add this class in a plugin.
+ * ===================================================================== */
+
+.acofb.acofb-annotate [data-api-field] {
+  position: relative;
+  outline: 1.5px dashed rgba(1, 111, 255, 0.7);
+  outline-offset: 4px;
+}
+
+.acofb.acofb-annotate [data-api-field]::after {
+  content: attr(data-api-field);
+  position: absolute;
+  top: -4px;
+  inset-inline-end: 8px;
+  z-index: 3;
+  display: block;
+  width: auto;
+  height: auto;
+  padding: 3px 8px;
+  font: 600 11px/1.3 var(--acofb-mono);
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+  color: #fff;
+  background: var(--acofb-indigo);
+  border-radius: 999px;
+  box-shadow: 0 1px 3px rgba(11, 16, 51, 0.3);
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 1;
+}
+
+.acofb.acofb-annotate [data-api-field][data-api-required]::after {
+  content: attr(data-api-field) " \00B7  required";
+}
+
+.acofb.acofb-annotate [data-api-field][data-api-value]::after {
+  content: attr(data-api-field) ": " attr(data-api-value);
+}
+
+/* Extra room so the pills never overlap each other or get clipped by the scrolling modal body. */
+.acofb.acofb-annotate .acofb-modal-body {
+  padding-top: 16px;
+}
+
+.acofb.acofb-annotate .acofb-contact {
+  padding-top: 18px;
+}
+
+.acofb.acofb-annotate .acofb-contact-fields {
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.acofb.acofb-annotate .acofb-panel {
+  gap: 24px;
+  padding-top: 26px;
+}
+
+.acofb.acofb-annotate .acofb-field-row {
+  gap: 24px 16px;
+}
+
+/* Side-by-side fields are narrow: keep their labels clear of the field-name pill. */
+.acofb.acofb-annotate .acofb-field-row > .acofb-field {
+  padding-top: 12px;
+}
+
+/* Fields the plugin adds automatically, listed only in annotated previews. */
+.acofb .acofb-api-auto {
+  display: none;
+}
+
+.acofb.acofb-annotate .acofb-api-auto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--acofb-muted);
+}
+
+.acofb .acofb-api-auto code {
+  padding: 2px 7px;
+  font: 600 11px/1.3 var(--acofb-mono);
+  color: var(--acofb-indigo);
+  background: rgba(17, 24, 82, 0.07);
+  border-radius: 999px;
+}
